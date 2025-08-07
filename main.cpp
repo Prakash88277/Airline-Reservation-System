@@ -24,14 +24,15 @@ string administrator_user;       // for set admin Username
 // First, declare functions at the top of your file
 void Update_Passenger_Details();
 
-
 // Priority Queue for managing booking priority
-struct BookingPriority {
+struct BookingPriority
+{
     string bookingId;
     int priority;
     time_t bookingTime;
-    
-    bool operator<(const BookingPriority& other) const {
+
+    bool operator<(const BookingPriority &other) const
+    {
         return priority < other.priority;
     }
 };
@@ -39,7 +40,8 @@ struct BookingPriority {
 priority_queue<BookingPriority> bookingQueue;
 
 // User tier system for frequent flyer points
-enum UserTier {
+enum UserTier
+{
     REGULAR = 1,
     SILVER = 2,
     GOLD = 3,
@@ -47,7 +49,8 @@ enum UserTier {
 };
 
 // Dynamic pricing factors
-struct PricingFactors {
+struct PricingFactors
+{
     float basePrice;
     float demandMultiplier;
     float timeMultiplier;
@@ -87,56 +90,79 @@ public:
         totalSeats = seats;
         availableSeats = seats;
         base_price = price;
-        
+
         // Set departure date and time
         tm departure_tm = {};
         departure_tm.tm_year = year - 1900;
         departure_tm.tm_mon = month - 1;
         departure_tm.tm_mday = day;
-        
+
         // Parse departure time (assuming format HH:MM)
         string dep_hour = dep_time.substr(0, 2);
         string dep_min = dep_time.substr(3, 2);
         departure_tm.tm_hour = stoi(dep_hour);
         departure_tm.tm_min = stoi(dep_min);
-        
+
         departureDateTime = mktime(&departure_tm);
     }
 
     // Dynamic pricing calculation
-    float calculateDynamicPrice(int seatClass, UserTier userTier = REGULAR) {
-        
+    float calculateDynamicPrice(int seatClass, UserTier userTier = REGULAR)
+    {
+
         time_t now = time(nullptr);
         int daysToDeparture = (departureDateTime - now) / (24 * 3600);
-        
+
         // Demand factor: price increases as seats become scarce
         float demandFactor = 1.0 + (1.0 - (float)availableSeats / totalSeats) * 0.5;
-        
+
         // Time factor: price increases as departure approaches
         float timeFactor = 1.0;
-        if (daysToDeparture <= 7) timeFactor = 1.5;
-        else if (daysToDeparture <= 14) timeFactor = 1.3;
-        else if (daysToDeparture <= 21) timeFactor = 1.2;
-        else if (daysToDeparture <= 28) timeFactor = 1.1;
-        
+        if (daysToDeparture <= 7)
+            timeFactor = 1.5;
+        else if (daysToDeparture <= 14)
+            timeFactor = 1.3;
+        else if (daysToDeparture <= 21)
+            timeFactor = 1.2;
+        else if (daysToDeparture <= 28)
+            timeFactor = 1.1;
+
         // Class multiplier
         float classMultiplier = 1.0;
-        switch(seatClass) {
-            case 1: classMultiplier = 2.0; break; // Business
-            case 2: classMultiplier = 1.5; break; // First
-            case 4: classMultiplier = 1.2; break; // Premium Economy
-            default: classMultiplier = 1.0; break; // Economy
+        switch (seatClass)
+        {
+        case 1:
+            classMultiplier = 2.0;
+            break; // Business
+        case 2:
+            classMultiplier = 1.5;
+            break; // First
+        case 4:
+            classMultiplier = 1.2;
+            break; // Premium Economy
+        default:
+            classMultiplier = 1.0;
+            break; // Economy
         }
-        
+
         // Tier discount
         float tierDiscount = 1.0;
-        switch(userTier) {
-            case PLATINUM: tierDiscount = 0.8; break;
-            case GOLD: tierDiscount = 0.85; break;
-            case SILVER: tierDiscount = 0.9; break;
-            default: tierDiscount = 1.0; break;
+        switch (userTier)
+        {
+        case PLATINUM:
+            tierDiscount = 0.8;
+            break;
+        case GOLD:
+            tierDiscount = 0.85;
+            break;
+        case SILVER:
+            tierDiscount = 0.9;
+            break;
+        default:
+            tierDiscount = 1.0;
+            break;
         }
-        
+
         return base_price * demandFactor * timeFactor * classMultiplier * tierDiscount;
     }
 
@@ -151,7 +177,7 @@ public:
         cout << "Departure Time: " << departure_time << endl;
         cout << "Arrival Time: " << arrival_time << endl;
         cout << "Base Fare: " << base_price << "/-" << endl;
-        
+
         // Show dynamic pricing for different classes
         cout << "Dynamic Pricing:" << endl;
         cout << "  Economy: " << calculateDynamicPrice(3) << "/-" << endl;
@@ -267,10 +293,8 @@ public:
     int gender;
     int is_special_fare;
     int meal_preference; // 1: Vegetarian, 2: Non-vegetarian, 3: Special diet
-    int baggage_weight; // in kg
+    int baggage_weight;  // in kg
     int frequent_flyer_points;
-    
-
 
     Passenger() {}
     Passenger(string n, string s, string pn, string tn, int sn, int fc, int a, int g, int iv, int meal = 1, int baggage = 20)
@@ -297,7 +321,6 @@ public:
         baggage_weight = baggage;
         frequent_flyer_points = 0;
     }
-
 
     // void set_name(const string& name) {
     //     fname = name;
@@ -365,8 +388,9 @@ public:
             cout << "Doctor and Nurses";
         else
             cout << "Regular";
-            
-        cout << ", Meal: " << (meal_preference == 1 ? "Vegetarian" : meal_preference == 2 ? "Non-vegetarian" : "Special diet");
+
+        cout << ", Meal: " << (meal_preference == 1 ? "Vegetarian" : meal_preference == 2 ? "Non-vegetarian"
+                                                                                          : "Special diet");
         cout << ", Baggage: " << baggage_weight << "kg";
         cout << ", Points: " << frequent_flyer_points << endl;
     }
@@ -446,7 +470,7 @@ public:
     {
         strncpy(booking_id, bid.c_str(), sizeof(booking_id) - 1);
         booking_id[19] = '\0';
-        
+
         strncpy(flight_no, fno.c_str(), sizeof(flight_no) - 1);
         flight_no[19] = '\0';
 
@@ -467,7 +491,7 @@ public:
 
         strncpy(flight_class, fc.c_str(), sizeof(flight_class) - 1);
         flight_class[19] = '\0';
-        
+
         booking_time = time(nullptr);
     }
 
@@ -541,10 +565,11 @@ public:
             p.display_pass();
         }
     }
-    
+
     // ... existing getter methods ...
     string get_booking_id()
     {
+        cout << "--->>> Book Id: " << booking_id << endl;
         return booking_id;
     }
     string get_departure()
@@ -598,91 +623,269 @@ public:
     {
         return Pass;
     }
-    
+
     int get_priority()
     {
         return priority;
     }
-    
+
     time_t get_booking_time()
     {
         return booking_time;
     }
-    
+
     // Setter methods for modifying reservation details
     void set_flight_no(string fno)
     {
         strncpy(flight_no, fno.c_str(), sizeof(flight_no) - 1);
         flight_no[19] = '\0';
     }
-    
+
     void set_flight_name(string fname)
     {
         strncpy(flight_name, fname.c_str(), sizeof(flight_name) - 1);
         flight_name[19] = '\0';
     }
-    
+
     void set_departure(string dep)
     {
         strncpy(departure, dep.c_str(), sizeof(departure) - 1);
         departure[19] = '\0';
     }
-    
+
     void set_arrival(string arr)
     {
         strncpy(arrival, arr.c_str(), sizeof(arrival) - 1);
         arrival[19] = '\0';
     }
-    
+
     void set_flight_date(string fd)
     {
         strncpy(flight_date, fd.c_str(), sizeof(flight_date) - 1);
         flight_date[19] = '\0';
     }
-    
+
     void set_flight_time(string ft)
     {
         strncpy(flight_time, ft.c_str(), sizeof(flight_time) - 1);
         flight_time[19] = '\0';
     }
-    
+
     void set_flight_class(string fc)
     {
         strncpy(flight_class, fc.c_str(), sizeof(flight_class) - 1);
         flight_class[19] = '\0';
     }
-    
+
     void set_fare(float new_fare)
     {
         fare = new_fare;
     }
-    
+
     void set_trip(int new_trip)
     {
         trip = new_trip;
     }
 };
 
+class review {
+    string fno;
+    vector<int> ratings;
+
+public:
+    review() {}
+
+    review(const string &flightNo, int rating) {
+        fno = flightNo;
+        ratings.push_back(rating);
+    }
+
+    string getFlightNo() const {
+        return fno;
+    }
+
+    void addRating(int rating) {
+        ratings.push_back(rating);
+    }
+
+    void displayRatings() const {
+        if (ratings.empty()) {
+            cout << "No ratings yet for flight " << fno << ".\n";
+            return;
+        }
+        double avg = 0.0;
+        for (int r : ratings) avg += r;
+        avg /= ratings.size();
+        cout << "\nAverage rating: " << avg << "\n";
+    }
+
+    void writeToFile(ofstream &fout) const {
+        fout << fno << " " << ratings.size();
+        for (int r : ratings) {
+            fout << " " << r;
+        }
+        fout << "\n";
+    }
+
+    void readFromFile(ifstream &fin) {
+        ratings.clear();
+        fin >> fno;
+        if (fin.eof() || !fin) return;
+
+        int count;
+        fin >> count;
+        for (int i = 0; i < count; ++i) {
+            int rating;
+            fin >> rating;
+            ratings.push_back(rating);
+        }
+    }
+
+    vector<int> getRatings() const {
+    return ratings;
+}
+
+};
+
+void reviewMenu() {
+    vector<review> allReviews;
+    ifstream fin("reviews.txt");
+
+    while (true) {
+        review r;
+        r.readFromFile(fin);
+        if (fin.eof() || !fin) break;
+        allReviews.push_back(r);
+    }
+    fin.close();
+
+    int choice;
+    do {
+        cout << "\n---- Review Menu ----\n";
+        cout << "1. Submit Review\n";
+        cout << "2. Check Review of a Flight\n";
+        cout << "3. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        if (choice == 1) {
+            string fno;
+            int rating;
+            cout << "Enter flight number: ";
+            cin >> fno;
+            cout << "Enter rating (1 to 5): ";
+            cin >> rating;
+
+            bool found = false;
+            for (auto &r : allReviews) {
+                if (r.getFlightNo() == fno) {
+                    r.addRating(rating);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                review newReview(fno, rating);
+                allReviews.push_back(newReview);
+            }
+
+            ofstream fout("reviews.txt");
+            for (const auto &r : allReviews) {
+                r.writeToFile(fout);
+            }
+            fout.close();
+
+            cout << "Review submitted successfully!\n";
+        }
+        else if (choice == 2) {
+            string fno;
+            cout << "Enter flight number to check reviews: ";
+            cin >> fno;
+
+            bool found = false;
+            for (const auto &r : allReviews) {
+                if (r.getFlightNo() == fno) {
+                    r.displayRatings();
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                cout << "No reviews found for this flight.\n";
+            }
+        }
+        else{
+            cout << "\n\nPress any key to continue ... " << endl;
+            getch();
+            main_menu();
+            system("cls");
+           break;
+        }
+
+    } while (choice != 3);
+}
+
+string reviewMenu2(const string& fnoo) {
+    vector<review> allReviews;
+    ifstream fin("reviews.txt");
+
+    while (true) {
+        review r;
+        r.readFromFile(fin);
+        if (fin.eof() || !fin) break;
+        allReviews.push_back(r);
+    }
+    fin.close();
+
+    for (const auto& r : allReviews) {
+        if (r.getFlightNo() == fnoo) {
+            if (!r.getRatings().empty()) {
+                double avg = 0;
+                for (int val : r.getRatings()) avg += val;
+                avg /= r.getRatings().size();
+
+                // Return formatted average rating string
+                ostringstream oss;
+                oss << " \x1B[36m[Rating: " << fixed << setprecision(1) << avg<<"]";
+                return oss.str();
+            } else {
+                return " \x1B[36m[Rating: N/A]\033[0m";
+            }
+        }
+    }
+    return " \x1B[36m[No reviews]\033[0m";
+}
+
+
 // Simulated booking function (without threading)
-void simulatedBooking(string flightNumber, int seats, int seatClass, UserTier userTier) {
+void simulatedBooking(string flightNumber, int seats, int seatClass, UserTier userTier)
+{
     cout << "User attempting to book " << seats << " seats on flight " << flightNumber << endl;
-    
+
     // Find flight and book seats
     fstream file("flight.dat", ios::in | ios::out | ios::binary);
-    if (file.is_open()) {
+    if (file.is_open())
+    {
         Flight f1;
-        while (file.read((char *)&f1, sizeof(f1))) {
-            if (f1.get_flight_number() == flightNumber) {
-                if (f1.bookSeat(seats, seatClass, userTier)) {
+        while (file.read((char *)&f1, sizeof(f1)))
+        {
+            if (f1.get_flight_number() == flightNumber)
+            {
+                if (f1.bookSeat(seats, seatClass, userTier))
+                {
                     cout << "Successfully booked " << seats << " seats" << endl;
-                    
+
                     // Add to priority queue
                     BookingPriority bp;
                     bp.bookingId = "BK" + to_string(time(nullptr)) + to_string(rand() % 1000);
                     bp.priority = userTier;
                     bp.bookingTime = time(nullptr);
                     bookingQueue.push(bp);
-                } else {
+                }
+                else
+                {
                     cout << "Failed to book seats - insufficient availability" << endl;
                 }
                 break;
@@ -693,65 +896,73 @@ void simulatedBooking(string flightNumber, int seats, int seatClass, UserTier us
 }
 
 // Function to simulate multiple users booking simultaneously
-void simulateMultiUserBooking() {
+void simulateMultiUserBooking()
+{
     cout << "\n=== Simulating Multi-User Booking ===" << endl;
-    
+
     string flightNumbers[] = {"AI101", "AI102", "AI103"};
-    
+
     // Simulate multiple users booking sequentially
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++)
+    {
         string flightNum = flightNumbers[i % 3];
         int seats = (i % 3) + 1;
         int seatClass = (i % 4) + 1;
         UserTier tier = static_cast<UserTier>((i % 4) + 1);
-        
+
         cout << "\n--- User " << (i + 1) << " ---" << endl;
         simulatedBooking(flightNum, seats, seatClass, tier);
         Sleep(1000); // Simulate processing time
     }
-    
+
     cout << "\nMulti-user booking simulation completed!" << endl;
     cout << "Press any key to continue..." << endl;
     getch();
 }
 
 // Function to generate popular routes report
-void generatePopularRoutesReport() {
+void generatePopularRoutesReport()
+{
     cout << "\n=== Popular Routes Report ===" << endl;
-    
+
     map<string, int> routeBookings;
-    
+
     // Read all reservations to count bookings per route
     ifstream file("reservation.dat", ios::binary);
-    if (file.is_open()) {
+    if (file.is_open())
+    {
         Reservation r;
-        while (file.peek() != EOF) {
+        while (file.peek() != EOF)
+        {
             r.readfromfile_rev(file);
             string route = r.get_departure() + " -> " + r.get_arrival();
             routeBookings[route]++;
         }
         file.close();
     }
-    
+
     // Sort routes by booking count
     vector<pair<string, int>> sortedRoutes;
-    for (const auto& route : routeBookings) {
+    for (const auto &route : routeBookings)
+    {
         sortedRoutes.push_back(route);
     }
-    
-    sort(sortedRoutes.begin(), sortedRoutes.end(), 
-         [](const pair<string, int>& a, const pair<string, int>& b) {
+
+    sort(sortedRoutes.begin(), sortedRoutes.end(),
+         [](const pair<string, int> &a, const pair<string, int> &b)
+         {
              return a.second > b.second;
          });
-    
+
     cout << "\nTop 5 Most Popular Routes:\n";
     cout << "Route\t\t\tBookings\n";
     cout << "--------------------------------\n";
-    
-    for (int i = 0; i < min(5, (int)sortedRoutes.size()); i++) {
+
+    for (int i = 0; i < min(5, (int)sortedRoutes.size()); i++)
+    {
         cout << sortedRoutes[i].first << "\t\t" << sortedRoutes[i].second << endl;
     }
-    
+
     cout << "\nPress any key to continue..." << endl;
     getch();
 }
@@ -908,7 +1119,7 @@ void Exit_msg()
     system("cls");
     cout << "\n\n\n\n\n\n\t\t\t\033[1;47;35m                                                    \033[0m\t\t\n";
     cout << "\t\t\t\033[1;47;35m --------------  THANKYOU FOR VISITING  ----------- \033[0m\t\t\n";
-    cout << "\t\t\t\033[1;47;35m                                 ~ nishant Airlines \033[0m\t\t\n\n\n\n\n\n\n";
+    cout << "\t\t\t\033[1;47;35m                                 ~ SVVV Airlines \033[0m\t\t\n\n\n\n\n\n\n";
     exit(0);
 }
 
@@ -996,7 +1207,7 @@ void Add_New_Flight()
     cin >> capacity;
     cout << "\nEnter Price: ";
     cin >> price;
-    
+
     // Get departure date for dynamic pricing
     cout << "\nEnter Departure Date (DD MM YYYY): ";
     int day, month, year;
@@ -1422,6 +1633,17 @@ void admin_login()
 void Available_flight(string from, string to, int day, int month, int year, int clas, int trip, int special_fare)
 {
     system("cls");
+    vector<review> allReviews;
+    ifstream fin("reviews.txt");
+    while (true)
+    {
+        review r;
+        r.readFromFile(fin);
+        if (fin.eof() || !fin)
+            break;
+        allReviews.push_back(r);
+    }
+    fin.close();
 
     string up_from = from;
     string up_to = to;
@@ -1462,8 +1684,7 @@ void Available_flight(string from, string to, int day, int month, int year, int 
         cout << "December";
     cout << " " << year << "\033[0m\n\n\n";
 
-    cout << "\t  Flight No.\t Flight Name  \tDeparture Time \t\t\t    Arrive Time\t     Price (Based on select Class)\n";
-
+    cout << "\t  Flight No.\t Flight Name  \tDeparture Time \t\t\t    Arrive Time\t   Price (Based on select Class)\tRating(out of5)\n";
     cout << "\t ------------------------------------------------------------------------------------------------\n";
     int flight_count = 1;
     ifstream file("flight.dat", ios::binary | ios::in);
@@ -1522,12 +1743,14 @@ void Available_flight(string from, string to, int day, int month, int year, int 
                     total_fare_perPerson = f1.get_price();
                 }
 
-                print_line("\t", char(218), char(196), char(191), 98);
-                cout << flight_count << ".\t" << char(179) << "   " << f1.get_flight_number() << "          " << f1.get_flight_name() << "       [\x1B[36m" << from << "\033[0m] " << f1.get_departure_time() << "\x1B[35m     -- " << diffHours << "hr" << diffMinutes << "min --     \033[0m" << f1.get_arrival_time() << " [\x1B[36m" << to << "\033[0m]   \x1B[32m" << total_fare_perPerson << "/-\033[0m \x1B[33m    BOOK NOW\033[0m\n";
+               print_line("\t", char(218), char(196), char(191), 98);
+                string fnoo=f1.get_flight_number();
+                cout << flight_count << ".\t" << char(179) << "   " << f1.get_flight_number() << "          " << f1.get_flight_name() << "       [\x1B[36m" << from << "\033[0m] " << f1.get_departure_time() << "\x1B[35m     -- " << diffHours << "hr" << diffMinutes << "min --     \033[0m" << f1.get_arrival_time() << " [\x1B[36m" << to << "\033[0m]   \x1B[32m" << total_fare_perPerson << "/-\033[0m \x1B[33m    BOOK NOW\033[0m\t\t\t"<<reviewMenu2(fnoo)<<"\n";
                 print_line("\t", char(192), char(196), char(217), 98);
 
                 flight_count++;
             }
+
         }
         if (!found_f)
         {
@@ -1703,7 +1926,8 @@ void Available_flight(string from, string to, int day, int month, int year, int 
             cout << "Enter Baggage Weight (in kg, max 30kg): ";
             int baggage_weight;
             cin >> baggage_weight;
-            if (baggage_weight > 30) {
+            if (baggage_weight > 30)
+            {
                 cout << "Baggage weight exceeds limit. Setting to 30kg.\n";
                 baggage_weight = 30;
             }
@@ -1735,14 +1959,16 @@ void Available_flight(string from, string to, int day, int month, int year, int 
         //------------------------------Dynamic Pricing Calculation---------------------------------
         // Get user tier (for now defaulting to REGULAR, can be enhanced with user login system)
         UserTier userTier = REGULAR;
-        
+
         // Calculate dynamic price based on demand, time, class, and user tier
         float total_fare_perPerson = f1.calculateDynamicPrice(clas, userTier);
-        
+
         // Add baggage charges if exceeding free allowance
         float baggage_charge = 0;
-        for (size_t i = 0; i < pass.size(); i++) {
-            if (pass[i].get_baggage_weight() > 20) { // Free allowance is 20kg
+        for (size_t i = 0; i < pass.size(); i++)
+        {
+            if (pass[i].get_baggage_weight() > 20)
+            {                                                               // Free allowance is 20kg
                 baggage_charge += (pass[i].get_baggage_weight() - 20) * 10; // $10 per kg extra
             }
         }
@@ -1752,15 +1978,13 @@ void Available_flight(string from, string to, int day, int month, int year, int 
         // Generate unique booking ID
         string booking_id = "BK" + to_string(time(nullptr)) + to_string(rand() % 1000);
 
-
-        
         // Add to priority queue
         BookingPriority bp;
         bp.bookingId = booking_id;
         bp.priority = userTier;
         bp.bookingTime = time(nullptr);
         bookingQueue.push(bp);
-        
+
         Reservation reserv(booking_id, booked_flight_no, f1.get_flight_name(), from, to, date, f1.get_departure_time(), f_class, trip, total_fare_perPerson, pass, userTier);
         ofstream file1("reservation.dat", ios::binary | ios::app);
         reserv.savetofile_rev(file1); // store all data of obj in binary file
@@ -1790,7 +2014,7 @@ void Available_flight(string from, string to, int day, int month, int year, int 
         //-------------------------------------------------------------------
 
         // ofstream file2("ticket.txt");
-        // file2 << "-------- NISHANT-AIRLINES ----------" << endl;
+        // file2 << "-------- SVVV-AIRLINES ----------" << endl;
         // file2 << "Ticket no. : " << " " << ticket_n << endl;
         // file2 << "Flight no. : " << booked_flight_no << endl;
         // file2 << "from : " << from << " To : " << to << endl;
@@ -1847,13 +2071,8 @@ void Available_flight(string from, string to, int day, int month, int year, int 
         cout << "\t|                                                                        Discount  : \x1B[31m" << discount << "/-\033[0m" << ((discount > 449) ? "\t\t " : "\t\t ") << "|\n";
         cout << "\t|                                                                        Discount  : \x1B[31m" << discount << "/-\033[0m" << ((discount > 449) ? "\t\t " : "\t\t ") << "|\n";
         cout << "\t|                                                              Total Payable Amount: \x1B[32m" << fare * pass.size() - discount << "/-\033[0m" << ((fare * pass.size() - discount > 9999) ? "\t\t " : "\t\t ") << "|\n";
-
         print_line("\t", char(192), char(196), char(217), 104);
-
-        cout << "\n\nPress any key to continue ... " << endl;
-        getch();
-        // system("pause"); // or (we can use also)
-        system("cls");
+        reviewMenu();
         return;
     }
     else
@@ -2251,7 +2470,7 @@ void Cancel_Ticket()
         Reservation R1;
         bool found = false;
         int reservation_position = 0;
-        
+
         // Find the reservation
         while (infile.peek() != EOF)
         {
@@ -2280,12 +2499,12 @@ void Cancel_Ticket()
             cout << "1. Flight Number (Select from available flights)\n";
             cout << "2. Departure Location\n";
             cout << "3. Arrival Location\n";
-            //cout << "4. Date\n"; 
+            //cout << "4. Date\n";
             cout << "5. Time\n";
             cout << "6. Flight Class\n";
             cout << "7. Trip Type (One Way/Round Trip)\n";
             cout << "8. Cancel Modification\n";
-            
+
             int modify_choice;
             cout << "Enter your choice (1-8): ";
             cin >> modify_choice;
@@ -2296,7 +2515,7 @@ void Cancel_Ticket()
                 string original_flight_no = R1.get_flight_no();
                 int original_passengers = R1.get_no_of_passenger();
                 string original_class = R1.get_flight_class();
-                
+
                 // Free up seats from original flight and show visual change
                 fstream flight_file("flight.dat", ios::in | ios::out | ios::binary);
                 if (flight_file.is_open())
@@ -2323,7 +2542,7 @@ void Cancel_Ticket()
                     case 1: // Flight Number - Show available flights for selection
                     {
                         cout << "\n\x1B[36m=== Available Flights for Selection ===\033[0m\n\n";
-                        
+
                         // Display all available flights
                         ifstream flight_display("flight.dat", ios::binary);
                         if (!flight_display.is_open())
@@ -2331,21 +2550,21 @@ void Cancel_Ticket()
                             cout << "\n\x1B[31mError opening flight file!\033[0m\n";
                             return;
                         }
-                        
+
                         Flight display_flight;
                         vector<Flight> available_flights;
                         int flight_count = 0;
-                        
+
                         cout << "No. | Flight No | Flight Name      | From      | To        | Date       | Time   | Available Seats | Price\n";
                         cout << "----|-----------|------------------|-----------|-----------|------------|--------|-----------------|-------\n";
-                        
+
                         while (flight_display.read((char *)&display_flight, sizeof(display_flight)))
                         {
                             if (display_flight.get_available_Seats() >= original_passengers)
                             {
                                 flight_count++;
                                 available_flights.push_back(display_flight);
-                                
+
                                 cout << setw(3) << flight_count << " | ";
                                 cout << setw(9) << display_flight.get_flight_number() << " | ";
                                 cout << setw(16) << display_flight.get_flight_name() << " | ";
@@ -2358,29 +2577,29 @@ void Cancel_Ticket()
                             }
                         }
                         flight_display.close();
-                        
+
                         if (available_flights.empty())
                         {
                             cout << "\n\x1B[31mNo flights available with sufficient seats!\033[0m\n";
                             return;
                         }
-                        
+
                         int selected_flight;
                         cout << "\nEnter the flight number (1-" << flight_count << ") to select: ";
                         cin >> selected_flight;
-                        
+
                         if (selected_flight < 1 || selected_flight > flight_count)
                         {
                             cout << "\n\x1B[31mInvalid flight selection!\033[0m\n";
                             return;
                         }
-                        
+
                         Flight selected = available_flights[selected_flight - 1];
                         string new_flight_no = selected.get_flight_number();
-                        
+
                         cout << "\n\x1B[32mSelected Flight: " << new_flight_no << " (" << selected.get_flight_name() << ")\033[0m\n";
                         cout << "Seats changing from \x1B[32mGREEN (Available)\033[0m to \x1B[31mRED (Occupied)\033[0m\n";
-                        
+
                         R1.set_flight_no(new_flight_no);
                         R1.set_flight_name(selected.get_flight_name());
                         R1.set_departure(selected.get_source());
@@ -2428,7 +2647,7 @@ void Cancel_Ticket()
                         cout << "4. First Class\n";
                         int new_class_choice;
                         cin >> new_class_choice;
-                        
+
                         string new_class;
                         switch (new_class_choice)
                         {
@@ -2436,7 +2655,7 @@ void Cancel_Ticket()
                             case 2: new_class = "Premium Economy"; break;
                             case 3: new_class = "Business"; break;
                             case 4: new_class = "First Class"; break;
-                            default: 
+                            default:
                                 cout << "\n\x1B[31mInvalid class choice!\033[0m\n";
                                 return;
                         }
@@ -2478,10 +2697,10 @@ void Cancel_Ticket()
                             if (R1.get_flight_class() == "Premium Economy") seat_class = 2;
                             else if (R1.get_flight_class() == "Business") seat_class = 3;
                             else if (R1.get_flight_class() == "First Class") seat_class = 4;
-                            
+
                             // Calculate new fare
                             float new_fare = f1.calculateDynamicPrice(seat_class, REGULAR);
-                            
+
                             // Add baggage charges
                             vector<Passenger> passengers = R1.get_pass_vector();
                             float baggage_charge = 0;
@@ -2493,9 +2712,9 @@ void Cancel_Ticket()
                                 }
                             }
                             new_fare += baggage_charge;
-                            
+
                             R1.set_fare(new_fare);
-                            
+
                             // Book seats on new flight
                             f1.bookSeat(original_passengers, seat_class, REGULAR);
                             flight_file_recalc.seekp(-static_cast<int>(sizeof(f1)), ios::cur);
@@ -2509,7 +2728,7 @@ void Cancel_Ticket()
                 // Update the reservation in the file
                 ifstream infile_update("reservation.dat", ios::binary);
                 ofstream temp_file("temp_reservation.dat", ios::binary);
-                
+
                 if (!infile_update.is_open() || !temp_file.is_open())
                 {
                     cerr << "Error opening files for update." << endl;
@@ -2519,7 +2738,7 @@ void Cancel_Ticket()
                 Reservation temp_res;
                 int current_position = 0;
                 bool updated = false;
-                
+
                 while (infile_update.peek() != EOF)
                 {
                     temp_res.readfromfile_rev(infile_update);
@@ -2536,15 +2755,15 @@ void Cancel_Ticket()
                     }
                     current_position++;
                 }
-                
+
                 infile_update.close();
                 temp_file.close();
-                
+
                 if (updated)
                 {
                     remove("reservation.dat");
                     rename("temp_reservation.dat", "reservation.dat");
-                    
+
                     cout << "\n\x1B[32mReservation modified successfully!\033[0m\n";
                     cout << "New Details:\n";
                     cout << "Flight: " << R1.get_flight_no() << " (" << R1.get_flight_name() << ")\n";
@@ -2577,7 +2796,7 @@ void Cancel_Ticket()
     {
         cout << "\n\n\n\t\t        --------------------- \033[1;47;34m No Any Booking Available \033[0m ---------------------\n\n\n";
     }
-    
+
     cout << "\n\nPress any key to continue ... " << endl;
     getch();
     system("cls");
@@ -2600,6 +2819,7 @@ void Modify_Ticket()
     {
         cout << "\n\n";
         found_ticket = My_Bookings(1);
+        cout << "\033[3;43;30m--- Flight Ticket Modification --- \033[0m\n\n";
     }
     else if (choice != 2 && choice != 1)
     {
@@ -2631,7 +2851,8 @@ void Modify_Ticket()
 
     // Search for booking
     ifstream infile("reservation.dat", ios::binary);
-    if (!infile.is_open()) {
+    if (!infile.is_open())
+    {
         cerr << "Error opening reservation file." << endl;
         return;
     }
@@ -2640,9 +2861,11 @@ void Modify_Ticket()
     bool found = false;
     int reservation_position = 0;
 
-    while (infile.peek() != EOF) {
+    while (infile.peek() != EOF)
+    {
         R1.readfromfile_rev(infile);
-        if (R1.get_booking_id() == booking_id) {
+        if (R1.get_booking_id() == booking_id)
+        {
             found = true;
             break;
         }
@@ -2650,7 +2873,8 @@ void Modify_Ticket()
     }
     infile.close();
 
-    if (!found) {
+    if (!found)
+    {
         cout << "\n\x1B[31mBooking ID not found!\033[0m\n";
         cout << "\n\nPress any key to continue ... ";
         getch();
@@ -2671,7 +2895,8 @@ void Modify_Ticket()
     int modify_type;
     cin >> modify_type;
 
-    if (modify_type == 3) {
+    if (modify_type == 3)
+    {
         cout << "\nModification cancelled.\n";
         return;
     }
@@ -2680,13 +2905,17 @@ void Modify_Ticket()
     int passengers = R1.get_no_of_passenger();
     string seat_class = R1.get_flight_class();
 
-    if (modify_type == 1) {
+    if (modify_type == 1)
+    {
         // Free previous seat
         fstream flight_file("flight.dat", ios::in | ios::out | ios::binary);
-        if (flight_file.is_open()) {
+        if (flight_file.is_open())
+        {
             Flight f1;
-            while (flight_file.read((char *)&f1, sizeof(f1))) {
-                if (f1.get_flight_number() == original_flight) {
+            while (flight_file.read((char *)&f1, sizeof(f1)))
+            {
+                if (f1.get_flight_number() == original_flight)
+                {
                     f1.cancelBookedSeat(passengers);
                     flight_file.seekp(-static_cast<int>(sizeof(f1)), ios::cur);
                     flight_file.write((char *)&f1, sizeof(f1));
@@ -2702,8 +2931,10 @@ void Modify_Ticket()
         Flight temp_f;
         int count = 0;
 
-        while (flight_display.read((char *)&temp_f, sizeof(temp_f))) {
-            if (temp_f.get_available_Seats() >= passengers) {
+        while (flight_display.read((char *)&temp_f, sizeof(temp_f)))
+        {
+            if (temp_f.get_available_Seats() >= passengers)
+            {
                 count++;
                 available.push_back(temp_f);
                 cout << count << ". " << temp_f.get_flight_number() << " - " << temp_f.get_flight_name() << " from " << temp_f.get_source() << " to " << temp_f.get_destination() << endl;
@@ -2711,7 +2942,8 @@ void Modify_Ticket()
         }
         flight_display.close();
 
-        if (available.empty()) {
+        if (available.empty())
+        {
             cout << "\n\x1B[31mNo flights with available seats.\033[0m\n";
             return;
         }
@@ -2719,7 +2951,8 @@ void Modify_Ticket()
         cout << "\nSelect new flight (1-" << count << "): ";
         int sel;
         cin >> sel;
-        if (sel < 1 || sel > count) {
+        if (sel < 1 || sel > count)
+        {
             cout << "Invalid selection!\n";
             return;
         }
@@ -2733,13 +2966,17 @@ void Modify_Ticket()
 
         // Class conversion
         int seat_code = 1;
-        if (seat_class == "Premium Economy") seat_code = 2;
-        else if (seat_class == "Business") seat_code = 3;
-        else if (seat_class == "First Class") seat_code = 4;
+        if (seat_class == "Premium Economy")
+            seat_code = 2;
+        else if (seat_class == "Business")
+            seat_code = 3;
+        else if (seat_class == "First Class")
+            seat_code = 4;
 
         float fare = chosen.calculateDynamicPrice(seat_code, REGULAR);
         float baggage_fee = 0;
-        for (auto &p : R1.get_pass_vector()) {
+        for (auto &p : R1.get_pass_vector())
+        {
             if (p.get_baggage_weight() > 14)
                 baggage_fee += (p.get_baggage_weight() - 14) * 10;
         }
@@ -2749,10 +2986,13 @@ void Modify_Ticket()
 
         // Book new seat
         fstream book_file("flight.dat", ios::in | ios::out | ios::binary);
-        if (book_file.is_open()) {
+        if (book_file.is_open())
+        {
             Flight temp;
-            while (book_file.read((char *)&temp, sizeof(temp))) {
-                if (temp.get_flight_number() == chosen.get_flight_number()) {
+            while (book_file.read((char *)&temp, sizeof(temp)))
+            {
+                if (temp.get_flight_number() == chosen.get_flight_number())
+                {
                     temp.bookSeat(passengers, seat_code, REGULAR);
                     book_file.seekp(-static_cast<int>(sizeof(temp)), ios::cur);
                     book_file.write((char *)&temp, sizeof(temp));
@@ -2762,8 +3002,9 @@ void Modify_Ticket()
             book_file.close();
         }
     }
-    else if (modify_type == 2) {
-        
+    else if (modify_type == 2)
+    {
+
         // cout << "Enter Passenger Modifed Name: ";
         // string new_name;
         // cin >> new_name;
@@ -2779,7 +3020,8 @@ void Modify_Ticket()
     Reservation temp_res;
     int pos = 0;
 
-    while (infile_u.peek() != EOF) {
+    while (infile_u.peek() != EOF)
+    {
         temp_res.readfromfile_rev(infile_u);
         if (pos == reservation_position)
             R1.savetofile_rev(temp);
@@ -2799,7 +3041,8 @@ void Modify_Ticket()
     system("cls");
 }
 
-void Update_Passenger_Details() {
+void Update_Passenger_Details()
+{
     system("cls");
     cout << "\n--- Update Passenger Details ---\n";
     cout << "Enter Ticket Number of Passenger to Update: ";
@@ -2807,7 +3050,8 @@ void Update_Passenger_Details() {
     cin >> ticket_no;
 
     fstream file("passenger.dat", ios::in | ios::out | ios::binary);
-    if (!file) {
+    if (!file)
+    {
         cout << "Error opening passenger.dat\n";
         Sleep(1500);
         system("cls");
@@ -2817,47 +3061,60 @@ void Update_Passenger_Details() {
     Passenger p;
     bool found = false;
     streampos pos;
-    while (!file.eof()) {
+    while (!file.eof())
+    {
         pos = file.tellg();
         // p.readFromFile_pass(file);
-        void readFromFile_pass(std::ifstream &inFile);
-        if (file.eof()) break;  // avoid duplicate last record due to while (!file.eof())
-        if (p.get_ticket_no() == ticket_no) {
+        void readFromFile_pass(std::ifstream & inFile);
+        if (file.eof())
+            break; // avoid duplicate last record due to while (!file.eof())
+        if (p.get_ticket_no() == ticket_no)
+        {
             found = true;
 
             cout << "\nPassenger found:\n";
             p.display_pass();
 
             int choice;
-            do {
+            do
+            {
                 cout << "\nWhich detail do you want to update?\n";
                 cout << "1. First Name\n2. Last Name\n3. Passport Number\n4. Age\n5. Gender\n6. Done\nEnter choice: ";
                 cin >> choice;
 
-                if (choice == 1) {
+                if (choice == 1)
+                {
                     string new_name;
                     cout << "Enter new First Name: ";
                     cin >> new_name;
                     strncpy(p.name, new_name.c_str(), sizeof(p.name) - 1);
                     p.name[sizeof(p.name) - 1] = '\0';
-                } else if (choice == 2) {
+                }
+                else if (choice == 2)
+                {
                     string new_surname;
                     cout << "Enter new Last Name: ";
                     cin >> new_surname;
                     strncpy(p.surname, new_surname.c_str(), sizeof(p.surname) - 1);
                     p.surname[sizeof(p.surname) - 1] = '\0';
-                } else if (choice == 3) {
+                }
+                else if (choice == 3)
+                {
                     string new_passport;
                     cout << "Enter new Passport Number: ";
                     cin >> new_passport;
                     strncpy(p.passport_number, new_passport.c_str(), sizeof(p.passport_number) - 1);
                     p.passport_number[sizeof(p.passport_number) - 1] = '\0';
-                } else if (choice == 4) {
+                }
+                else if (choice == 4)
+                {
                     int new_age;
                     cout << "Enter new Age: ";
                     cin >> new_age;
                     p.age = new_age;
-                } else if (choice == 5) {
+                }
+                else if (choice == 5)
+                {
                     int new_gender;
                     cout << "Enter new Gender (1=Male, 2=Female): ";
                     cin >> new_gender;
@@ -2868,7 +3125,7 @@ void Update_Passenger_Details() {
             // Go back and write the record
             file.seekp(pos);
             // p.writeToFile_pass(file);
-            void writeToFile_pass(std::ofstream &outFile);
+            void writeToFile_pass(std::ofstream & outFile);
 
             cout << "\nPassenger details updated!\n";
             break;
@@ -2907,9 +3164,11 @@ void main_menu()
     print_line("\t ", '\xcd', '\xcd', '\xcd', 30);
     cout << "\t 5. Multi-User Booking Simulation\n";
     print_line("\t ", '\xcd', '\xcd', '\xcd', 30);
-    cout << "\t 6. Log Out\n";
+    cout << "\t 6. Reviews\n";
     print_line("\t ", '\xcd', '\xcd', '\xcd', 30);
-    cout << "\t 7. Exit \n";
+    cout << "\t 7. Log Out\n";
+    print_line("\t ", '\xcd', '\xcd', '\xcd', 30);
+    cout << "\t 8. Exit \n";
     print_line("\t ", '\xcd', '\xcd', '\xcd', 30);
 
     print_line("\n   ", '\xcd', '\xcd', '\xcd', 43);
@@ -2948,7 +3207,11 @@ void main_menu()
         simulateMultiUserBooking();
         main_menu();
     }
-    else if (option == 6) // logout karne le liye
+    else if(option==6)
+    {
+        reviewMenu();
+    }
+    else if (option == 7) // logout karne le liye
     {
         login_status = false;
         cout << "\n\t\x1B[32m--Logout Successfull--\033[0m\t\t\n";
@@ -2956,7 +3219,7 @@ void main_menu()
         system("cls");
         login_menu();
     }
-    else if (option == 7) // Exit
+    else if (option == 8) // Exit
     {
         Exit_msg();
     }
@@ -3126,8 +3389,8 @@ void login_menu()
 int main()
 {
     system("cls");
-    // welcome();
-    // welcome_animation();
+    welcome();
+
     login_menu();
 
     return 0;

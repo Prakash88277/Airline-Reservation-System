@@ -2069,7 +2069,6 @@ void Available_flight(string from, string to, int day, int month, int year, int 
 
         cout << "\t|                                                           Fare of (" << pass.size() << " Travellers) : \x1B[31m" << fare * pass.size() << "/-\033[0m" << ((fare * pass.size() > 9999) ? "\t\t " : "\t\t ") << "|\n";
         cout << "\t|                                                                        Discount  : \x1B[31m" << discount << "/-\033[0m" << ((discount > 449) ? "\t\t " : "\t\t ") << "|\n";
-        cout << "\t|                                                                        Discount  : \x1B[31m" << discount << "/-\033[0m" << ((discount > 449) ? "\t\t " : "\t\t ") << "|\n";
         cout << "\t|                                                              Total Payable Amount: \x1B[32m" << fare * pass.size() - discount << "/-\033[0m" << ((fare * pass.size() - discount > 9999) ? "\t\t " : "\t\t ") << "|\n";
         print_line("\t", char(192), char(196), char(217), 104);
         reviewMenu();
